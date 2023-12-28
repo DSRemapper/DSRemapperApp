@@ -9,6 +9,9 @@
     <StartupObject>DSRemapperApp.Program</StartupObject>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
     <ApplicationIcon>DSRIcon.ico</ApplicationIcon>
+    <AssemblyVersion>0.2.0</AssemblyVersion>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
+    <Version>$(AssemblyVersion)</Version>
   </PropertyGroup>
 
   <ItemGroup>
