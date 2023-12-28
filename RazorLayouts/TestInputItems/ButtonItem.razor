@@ -1,0 +1,13 @@
+﻿<div class="button-item">
+    <span>@Name</span>
+    <svg width="50px" height="25px">
+        <rect x="0" y="0" width="50" height="25" rx="4" ry="4" fill="@(Value?"#aaa":"#282828")"></rect>
+    </svg>
+</div>
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = "Unamed";
+    [Parameter]
+    public bool Value { get; set; } = false;
+}

@@ -1,0 +1,20 @@
+﻿<div class="axis-item">
+    <span>@Name</span>
+    <svg width="100px" height="@height">
+        <rect x="0" y="0" width="100" height="@height" rx="@borrad" ry="@borrad" fill="#282828"></rect>
+        <rect x="0" y="0" width="@svgVal" height="@height" rx="@borrad" ry="@borrad" fill="#aaa"></rect>
+    </svg>
+    <span>@($"{Value:0.000}")</span>
+</div>
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = "Unamed";
+    [Parameter]
+    public float Value { get; set; } = 0;
+
+    const int borrad = 3;
+    const int height = 15;
+
+    private int svgVal => (int)Math.Round((Value + 1) * 50,0);
+}

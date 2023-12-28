@@ -1,0 +1,39 @@
+﻿@using System.Diagnostics
+@using System.Reflection
+
+<div id="subapp">
+    <div id="main-view" class="column-span2 row-span3">
+        <div class="about-view">
+            <div class="about-title">DSRemapper Application</div>
+            <div class="about-versions">
+                App version: @GetAppVersion()<br>
+                Core version: @GetCoreVersion()<br>
+                Framework version: @GetFrameworkVersion()
+            </div>
+            <div class="about-author">Author: Oscar-Wohlfarhrt</div>
+            <div class="about-github">Github: <a onclick=@(()=>GithubLink())>github.com/DSRemapper</a></div>
+        </div>
+    </div>
+</div>
+
+@code {
+    void GithubLink()
+    {
+        Process.Start(new ProcessStartInfo("https://github.com/DSRemapper") { UseShellExecute = true });
+    }
+    string GetAppVersion()
+    {
+        AssemblyName asm = Assembly.GetExecutingAssembly().GetName();
+        return asm.Version?.ToString(3) ?? "Unknown";
+    }
+    string GetCoreVersion()
+    {
+        AssemblyName asm = typeof(DSRemapper.Core.IDSRInputController).Assembly.GetName();
+        return asm.Version?.ToString(3) ?? "Unknown";
+    }
+    string GetFrameworkVersion()
+    {
+        AssemblyName asm = typeof(DSRemapper.Framework.PluginsLoader).Assembly.GetName();
+        return asm.Version?.ToString(3) ?? "Unknown";
+    }
+}

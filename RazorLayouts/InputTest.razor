@@ -1,0 +1,83 @@
+﻿@using DSRemapper.Core;
+@using DSRemapper.Types;
+@using DSRemapper.DSRMath;
+@using DSRemapper.Framework;
+
+@implements IDisposable
+
+<div id="subapp">
+    <nav id="nav-bar">
+        <button>Scroll to end</button>
+    </nav>
+    <div id="input-test-view" class="column-span2">
+        @if (report != null)
+        {
+            @for (int i = 0; i < report.Axes.Length; i++)
+            {
+                <AxisItem Name=@($"Axis[{i}]") Value=report.Axes[i] />
+            }
+            @for (int i = 0; i < report.Sliders.Length; i++)
+            {
+                <AxisItem Name=@($"Sliders[{i}]") Value=report.Sliders[i] />
+            }
+            @for (int i = 0; i < report.Povs.Length; i++)
+            {
+                <PovItem Name=@($"Pov[{i}]") Value=report.Povs[i] />
+            }
+            @for (int i = 0; i < report.Buttons.Length; i++)
+            {
+                <ButtonItem Name=@($"Buttons[{i}]") Value=report.Buttons[i] />
+            }
+            @for (int i = 0; i < report.SixAxes.Length; i++)
+            {
+                <SixAxisItem Name=@($"SixAxis[{i}]") Value=report.SixAxes[i] Scale=@(i<SixAxisScales.Length?SixAxisScales[i]:1f) />
+            }
+            @for (int i = 0; i < report.Touch.Length; i++)
+            {
+                <TouchItem Name=@($"Touch[{i}]") Value=report.Touch[i] />
+            }
+            @for (int i = 0; i < report.Quaternions.Length; i++)
+            {
+                <QuatItem Name=@($"Quaternion[{i}]") Value=report.Quaternions[i] />
+            }
+        }
+    </div>
+    <footer id="footer">
+        @if (report != null)
+        {
+            <span>Battery: @report.Battery</span>
+            <span>USB: @report.Charging</span>
+        }
+    </footer>
+</div>
+
+@code {
+    [Parameter]
+    public Remapper Remapper { get; set; } = null!;
+
+    private IDSRInputReport? report = null;
+    static readonly float[] SixAxisScales = new[] { 1f, 500f, 1f, 1f };
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (firstRender)
+        {
+            Remapper.OnRead += OnControllerRead;
+        }
+    }
+
+    private void OnControllerRead(IDSRInputReport report)
+    {
+        this.report = report;
+        this.InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose()
+    {
+        Remapper.OnRead -= OnControllerRead;
+    }
+}

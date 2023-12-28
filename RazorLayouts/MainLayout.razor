@@ -1,0 +1,119 @@
+@page "/"
+@using System.Diagnostics
+@using DSRemapper
+@using DSRemapper.Core
+@using DSRemapper.Framework
+@using DSRemapperApp.RazorLayouts
+@using DSRemapperApp.RazorLayouts.MainComponents
+@using FireLibs.Logging
+
+@inject IJSRuntime JsRuntime
+
+@functions {
+    ElementReference appDiv;
+    void ToggleCssClass(ElementReference element, string cssClass)
+    {
+        JsRuntime.InvokeVoidAsync("ToggleCssClass", new object[] { element, cssClass });
+    }
+    ElementReference footer;
+    void SetHTMLLog(string html)
+    {
+        JsRuntime.InvokeVoidAsync("SetHTML", new object[] { footer, html });
+    }
+}
+
+<div id="subapp" class="hide-side-panel" @ref=appDiv>
+    <NavBar>
+        <button onclick=@(() => ShowSidePanel())>Plugins Menu</button>
+        <button onclick=@(() => WindowsControllers())>Windows Controllers</button>
+        <button onclick=@(() => ShowConsole()) class="to-right">Debug Console</button>
+        <button onclick=@(() => ShowAbout())>About</button>
+    </NavBar>
+    <div id="side-panel">
+        <button>Plugin Manager</button>
+        <button>Plugin 1</button>
+        <button>Plugin 2</button>
+        <button>Plugin 3</button>
+        <button>Plugin 4</button>
+    </div>
+    <div id="main-view">
+        <!--<ControllerItem Remapper="null!" />-->
+        @foreach (var rmp in RemapperCore.Remappers)
+        {
+            <ControllerItem Remapper="rmp" />
+        }
+    </div>
+    <footer id="footer" class="debug-console" @ref=footer>
+    </footer>
+</div>
+
+@code{
+    DSRForm<About>? aboutWindow;
+    DSRForm<DebugConsole>? consoleWindow;
+
+    private void ShowSidePanel()
+    {
+        ToggleCssClass(appDiv, "hide-side-panel");
+    }
+
+    private void WindowsControllers()
+    {
+        new Process()
+        {
+            StartInfo = {
+    FileName = "cmd",
+    Arguments = "/C %SystemRoot%\\System32\\joy.cpl",
+    CreateNoWindow = true
+}
+        }.Start();
+    }
+    private void ShowAbout()
+    {
+        if (aboutWindow?.IsDisposed ?? true)
+            aboutWindow = new(width: 500, height: 300, title: "About");
+
+        aboutWindow.Show();
+        aboutWindow.Focus();
+    }
+    private void ShowConsole()
+    {
+        if (consoleWindow?.IsDisposed ?? true)
+            consoleWindow = new(title: "Debug Console");
+
+        consoleWindow.Show();
+        consoleWindow.Focus();
+    }
+    private void PrintLog(LogEntry log)
+    {
+        SetHTMLLog(log.ToHTMLTag());
+    }
+
+    private void ControllersUpdate()
+    {
+        this.InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+#if DEBUG
+            ShowConsole();
+#endif
+
+            DSRLogger.OnLog += PrintLog;
+
+            RemapperCore.OnUpdate += ControllersUpdate;
+            RemapperCore.StartScanner();
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+    public void Dispose()
+    {
+
+    }
+}

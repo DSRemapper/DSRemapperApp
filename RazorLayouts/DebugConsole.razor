@@ -1,0 +1,62 @@
+﻿@using DSRemapper
+@using FireLibs.Logging
+
+@inject IJSRuntime JsRuntime
+@implements IDisposable
+
+@functions{
+    ElementReference main, logConsole;
+    InputCheckbox? autoScrollCheck;
+
+    void ScrollBottom()
+    {
+        JsRuntime.InvokeVoidAsync("ScrollToBottom", new object[] { main });
+    }
+    void AddHTMLLog(string html)
+    {
+        JsRuntime.InvokeVoidAsync("AddHTML", new object[] { main, html });
+    }
+    void SetHTMLLog(string html)
+    {
+        JsRuntime.InvokeVoidAsync("SetHTML", new object[] { main, html });
+    }
+}
+
+<div id="subapp">
+    <nav id="nav-bar">
+        <button>Scroll to end</button>
+    </nav>
+    <div class="debug-console column-span2" @ref="main">
+    </div>
+    <footer id="footer"><label><InputCheckbox @bind-Value=@AutoScroll @ref="autoScrollCheck"></InputCheckbox> Autoscroll</label></footer>
+</div>
+
+@code {
+    bool AutoScroll { get; set; }
+
+    void PrintLog(LogEntry log)
+    {
+        AddHTMLLog(log.ToHTMLTag());
+        if (AutoScroll)
+            ScrollBottom();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (firstRender)
+        {
+
+            foreach (var log in DSRLogger.Entries.ToArray())
+                PrintLog(log);
+
+            ScrollBottom();
+            DSRLogger.OnLog += PrintLog;
+        }
+    }
+
+    public void Dispose()
+    {
+        DSRLogger.OnLog -= PrintLog;
+    }
+}
