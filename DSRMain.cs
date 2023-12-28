@@ -16,7 +16,7 @@ namespace DSRemapperApp
             {
                 var services = new ServiceCollection();
                 services.AddWindowsFormsBlazorWebView();
-                blazorWebView1.HostPage = "wwwroot/index.html";//Path.Combine(DSRPaths.ProgramPath, "wwwroot\\index.html");
+                blazorWebView1.HostPage = Path.Combine(DSRPaths.ProgramPath, "wwwroot\\index.html");
                 blazorWebView1.Services = services.BuildServiceProvider();
                 blazorWebView1.RootComponents.Add<MainLayout>("#app");
                 Text = "DSRemapper App";
@@ -33,7 +33,7 @@ namespace DSRemapperApp
         {
             var services = new ServiceCollection();
             services.AddWindowsFormsBlazorWebView();
-            blazorWebView1.HostPage = "wwwroot/index.html";//Path.Combine(DSRPaths.ProgramPath, "wwwroot\\index.html");
+            blazorWebView1.HostPage = Path.Combine(DSRPaths.ProgramPath, "wwwroot\\index.html");
             blazorWebView1.Services = services.BuildServiceProvider();
             blazorWebView1.RootComponents.Add<T>("#app", parameters);
             ClientSize = new Size(width, height);
