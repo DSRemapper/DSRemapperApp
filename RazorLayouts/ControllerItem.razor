@@ -1,12 +1,14 @@
 ﻿@using DSRemapper;
 @using DSRemapper.Framework;
 
+@implements IDisposable
+
 <div class="ctrl-item">
     <div class="ctrl-img">
         <img src="@GetControllerImage()" onerror="this.onerror=null;this.src='UnknownController.png';">
     </div>
     <div class="ctrl-main">
-        <div class="ctrl-title"><label><InputCheckbox @bind-Value=Active/>@Name - @Type</label></div>
+        <div class="ctrl-title"><label><InputCheckbox @bind-Value=Active />@Name - @Type</label></div>
         <div class="ctrl-info monospace">@InfoLine</div>
         <select class="ctrl-profile-list" value="@Remapper.CurrentProfile" onchange="@((ChangeEventArgs e) => UpdateProfile(e))">
             <option value="">Select a profile</option>
@@ -33,6 +35,8 @@
 
     private bool active;
 
+    private static readonly DSRLogger logger = DSRLogger.GetLogger("DSRemapper.ControllerItem");
+
     private bool Active
     {
         get => active;
@@ -54,7 +58,7 @@
 
     private string GetControllerImage()
     {
-        return $"data:image/gif;base64,{Convert.ToBase64String(PluginsLoader.GetControllerImage(Remapper.Controller))}";
+        return $"data:image/gif;base64,{Convert.ToBase64String(PluginLoader.GetControllerImage(Remapper.Controller))}";
     }
 
     private void SetProfile(string profile)
@@ -66,7 +70,7 @@
     {
         if (inputTest?.IsDisposed ?? true)
             inputTest = new(new Dictionary<string, object?>()
-        {
+    {
                 {"Remapper", Remapper},
             });
 
@@ -79,7 +83,7 @@
         string profile = e.Value?.ToString() ?? "";
         SetProfile(profile);
         DSRConfigs.SetLastProfile(Remapper.Id, profile);
-        DSRLogger.LogInformation($"{Remapper.Id} selected profile {profile}");
+        logger.LogInformation($"{Remapper.Id} selected profile {profile}");
     }
 
     private void RemapperOnLog(object sender, FireLibs.Logging.LogLevel level, bool deviceConsole, string message)
@@ -87,7 +91,7 @@
         if (deviceConsole)
             ConsoleText = message;
         else
-            DSRLogger.Log(level,message);
+            logger.Log(level, message);
 
         this.InvokeAsync(() =>
         {
@@ -107,5 +111,12 @@
             SetProfile(config.LastProfile);
             StateHasChanged();
         }
+    }
+
+
+    public void Dispose()
+    {
+        inputTest?.Close();
+        inputTest?.Dispose();
     }
 }

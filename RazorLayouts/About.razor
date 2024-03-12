@@ -33,7 +33,7 @@
     }
     string GetFrameworkVersion()
     {
-        AssemblyName asm = typeof(DSRemapper.Framework.PluginsLoader).Assembly.GetName();
+        AssemblyName asm = typeof(DSRemapper.Framework.PluginLoader).Assembly.GetName();
         return asm.Version?.ToString(3) ?? "Unknown";
     }
 }

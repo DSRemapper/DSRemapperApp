@@ -90,13 +90,11 @@ button {
     #side-panel > * {
         height: 35px;
     }
-
 #main-view {
-    display: flex;
-    flex-direction: column;
-    padding: 5px;
+    margin: 0px;
+    padding: 0px;
     width: 100%;
-    gap: 5px;
+    height: 100%;
     overflow: auto;
 }
 

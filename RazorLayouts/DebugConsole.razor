@@ -1,5 +1,6 @@
 ﻿@using DSRemapper
-@using FireLibs.Logging
+@using FireLibs.Logging;
+@using System.Web;
 
 @inject IJSRuntime JsRuntime
 @implements IDisposable
@@ -32,11 +33,12 @@
 </div>
 
 @code {
-    bool AutoScroll { get; set; }
+    bool AutoScroll { get; set; } = true;
 
     void PrintLog(LogEntry log)
     {
         AddHTMLLog(log.ToHTMLTag());
+
         if (AutoScroll)
             ScrollBottom();
     }

@@ -1,0 +1,10 @@
+﻿
+@using DSRemapper.Framework
+
+<div id="controllers-view">
+    @foreach (var rmp in RemapperCore.Remappers)
+    {
+        <ControllerItem Remapper="rmp" />
+    }
+</div>
+

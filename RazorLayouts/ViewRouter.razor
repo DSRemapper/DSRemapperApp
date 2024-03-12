@@ -1,0 +1,38 @@
+﻿
+@using DSRemapper.Framework
+@using DSRemapperApp
+@using DSRemapperApp.RazorLayouts
+@using DSRemapperApp.RazorLayouts.MainPages
+
+@inject NavigationManager navigationManager
+
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="div" />
+    </Found>
+    <NotFound>
+        <MainLayout>
+            <h1>Fail</h1>
+        </MainLayout>
+    </NotFound>
+</Router>
+<!--code{
+
+
+    private void ControllersUpdate()
+    {
+        this.InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            RemapperCore.OnUpdate += ControllersUpdate;
+        }
+        base.OnAfterRender(firstRender);
+    }
+}-->
