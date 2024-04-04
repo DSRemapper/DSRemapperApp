@@ -39,9 +39,12 @@
     </div>
     <div id="main-view">
         <div id="controllers-view">
-            @foreach (var rmp in RemapperCore.Remappers)
+            @if (reloadItems)
             {
-                <ControllerItem Remapper="rmp" />
+                @foreach (var rmp in RemapperCore.Remappers)
+                {
+                    <ControllerItem @ref="AddItemProp" Remapper="rmp" />
+                }
             }
         </div>
     </div>
@@ -50,74 +53,78 @@
 </div>
 
 @code{
+    List<ControllerItem> items = new();
 
-static DSRForm<About>? aboutWindow;
-static DSRForm<DebugConsole>? consoleWindow;
+    private ControllerItem AddItemProp { set => items.Add(value); }
 
-private void ShowSidePanel()
-{
-    ToggleCssClass(appDiv, "hide-side-panel");
-    Program.sidePanel = !Program.sidePanel;
-}
+    static DSRForm<About>? aboutWindow;
+    static DSRForm<DebugConsole>? consoleWindow;
+    bool reloadItems = true;
 
-private void WindowsControllers()
-{
-    new Process()
+    private void ShowSidePanel()
     {
-        StartInfo = {
+        ToggleCssClass(appDiv, "hide-side-panel");
+        Program.sidePanel = !Program.sidePanel;
+    }
+
+    private void WindowsControllers()
+    {
+        new Process()
+        {
+            StartInfo = {
 FileName = "cmd",
 Arguments = "/C %SystemRoot%\\System32\\joy.cpl",
 CreateNoWindow = true
 }
-    }.Start();
-}
-private void ShowAbout()
-{
-    if (aboutWindow?.IsDisposed ?? true)
-        aboutWindow = new(width: 500, height: 300, title: "About");
-
-    aboutWindow.Show();
-    aboutWindow.Focus();
-}
-private void ShowConsole()
-{
-    if (consoleWindow?.IsDisposed ?? true)
-        consoleWindow = new(title: "Debug Console");
-
-    consoleWindow.Show();
-    consoleWindow.Focus();
-}
-private void PrintLog(LogEntry log)
-{
-    SetHTMLLog(log.ToHTMLTag());
-}
-
-private void ControllersUpdate()
-{
-    this.InvokeAsync(() =>
+        }.Start();
+    }
+    private void ShowAbout()
     {
-        StateHasChanged();
-    });
-}
+        if (aboutWindow?.IsDisposed ?? true)
+            aboutWindow = new(width: 500, height: 300, title: "About");
 
-protected override void OnAfterRender(bool firstRender)
-{
-    if (firstRender)
+        aboutWindow.Show();
+        aboutWindow.Focus();
+    }
+    private void ShowConsole()
     {
+        if (consoleWindow?.IsDisposed ?? true)
+            consoleWindow = new(title: "Debug Console");
+
+        consoleWindow.Show();
+        consoleWindow.Focus();
+    }
+    private void PrintLog(LogEntry log)
+    {
+        SetHTMLLog(log.ToHTMLTag());
+    }
+
+    private void ControllersUpdate()
+    {
+        this.InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
 #if DEBUG
-ShowConsole();
+            ShowConsole();
 #endif
 
-DSRLogger.OnLog += PrintLog;
+            DSRLogger.OnLog += PrintLog;
 
-RemapperCore.OnUpdate += ControllersUpdate;
-RemapperCore.StartScanner();
-}
-base.OnAfterRender(firstRender);
-}
+            RemapperCore.OnUpdate += ControllersUpdate;
+            RemapperCore.StartScanner();
+        }
+        base.OnAfterRender(firstRender);
+    }
 
-public void Dispose()
-{
+    public void Dispose()
+    {
 
-}
+    }
 }

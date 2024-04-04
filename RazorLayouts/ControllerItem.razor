@@ -1,4 +1,5 @@
 ﻿@using DSRemapper;
+@using DSRemapper.Types;
 @using DSRemapper.Framework;
 
 @implements IDisposable
@@ -10,13 +11,13 @@
     <div class="ctrl-main">
         <div class="ctrl-title"><label><InputCheckbox @bind-Value=Active />@Name - @Type</label></div>
         <div class="ctrl-info monospace">@InfoLine</div>
-        <select class="ctrl-profile-list" value="@Remapper.CurrentProfile" onchange="@((ChangeEventArgs e) => UpdateProfile(e))">
+        <InputSelect class="ctrl-profile-list" @bind-Value="selectProfile">
             <option value="">Select a profile</option>
             @foreach (string op in ProfileManager.GetProfiles())
             {
                 <option value="@op">@op</option>
             }
-        </select>
+        </InputSelect>
         <div class="ctrl-console monospace">@ConsoleText</div>
     </div>
     <div class="ctrl-actions">
@@ -33,44 +34,68 @@
 
     public DSRForm<InputTest>? inputTest = null;
 
-    private bool active;
+    private bool firstTime = true;
+    private string lastId = "";
+
 
     private static readonly DSRLogger logger = DSRLogger.GetLogger("DSRemapper.ControllerItem");
 
     private bool Active
     {
-        get => active;
+        get => config?.AutoConnect??false;
         set
         {
             if (value)
             {
                 Remapper.Start();
             }
-            DSRConfigs.SetAutoConnect(Remapper.Id, value);
-            active = value;
+            if(value != config.AutoConnect)
+            {
+                config.AutoConnect = value;
+                DSRConfigs.SetConfig(config, Remapper.Id);
+            }
+        }
+    }
+
+    private string selectProfile
+    {
+        get => Remapper.CurrentProfile;
+        set
+        {
+
+            if (value!= Remapper.CurrentProfile)
+            {
+                Remapper.SetProfile(value);
+                config.LastProfile = value;
+                DSRConfigs.SetConfig(config,Remapper.Id);
+
+                logger.LogInformation($"{Remapper.Name} [{Remapper.Id}]: selected profile {value}");
+            }
         }
     }
 
     private string Name => Remapper.Name;
     private string Type => Remapper.Type;
-    private string InfoLine = "";
-    private string ConsoleText = "";
+    private string InfoLine { get; set; } = "";
+    private string ConsoleText { get; set; } = "";
+
+    private RemapperConfig? config;
 
     private string GetControllerImage()
     {
         return $"data:image/gif;base64,{Convert.ToBase64String(PluginLoader.GetControllerImage(Remapper.Controller))}";
     }
 
-    private void SetProfile(string profile)
+    /*private void SetProfile(string profile)
     {
         Remapper.SetProfile(profile);
-    }
+    }*/
 
     public void ShowInputTest()
     {
         if (inputTest?.IsDisposed ?? true)
             inputTest = new(new Dictionary<string, object?>()
-    {
+        {
                 {"Remapper", Remapper},
             });
 
@@ -78,21 +103,31 @@
         inputTest.Focus();
     }
 
-    private void UpdateProfile(ChangeEventArgs e)
-    {
-        string profile = e.Value?.ToString() ?? "";
-        SetProfile(profile);
-        DSRConfigs.SetLastProfile(Remapper.Id, profile);
-        logger.LogInformation($"{Remapper.Id} selected profile {profile}");
-    }
-
     private void RemapperOnLog(object sender, FireLibs.Logging.LogLevel level, bool deviceConsole, string message)
     {
         if (deviceConsole)
-            ConsoleText = message;
+        {
+            if (level == FireLibs.Logging.LogLevel.Error)
+            {
+                ConsoleText = new FireLibs.Logging.LogEntry(level, message).ToHTMLTag();
+            }
+            else
+                ConsoleText = message;
+        }
         else
             logger.Log(level, message);
 
+        this.InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    private void InfoUpdate(IDSRInputReport report)
+    {
+        InfoLine = Remapper.Info;
+        /*if (Remapper.Info != "")
+            logger.LogDebug(Remapper.Info);*/
         this.InvokeAsync(() =>
         {
             StateHasChanged();
@@ -104,18 +139,47 @@
         base.OnAfterRender(firstRender);
         if (firstRender)
         {
-            //Remapper.OnRead += OnControllerRead;
             Remapper.OnLog += RemapperOnLog;
-            RemapperConfig config = DSRConfigs.GetConfig(Remapper.Id);
+            Remapper.OnRead += InfoUpdate;
+            config = DSRConfigs.GetConfig(Remapper.Id);
+            selectProfile = config.LastProfile;
             Active = config.AutoConnect;
-            SetProfile(config.LastProfile);
-            StateHasChanged();
-        }
-    }
 
+            lastId = Remapper.Id;
+            logger.LogDebug($"{Remapper.Id} FirstRender");
+
+        }
+        /*if (lastId != Remapper.Id)
+        {
+            //var rem = RemapperCore.Remappers.Find((r) => r.Id == lastId);
+            //if(rem!=null)
+            //    rem.OnLog -= RemapperOnLog;
+
+            //ConsoleText = "";
+            //Remapper.OnLog -= RemapperOnLog;
+            logger.LogDebug($"{Remapper.Id} on {lastId}");
+            lastId = Remapper.Id;
+            config = DSRConfigs.GetConfig(Remapper.Id);
+            selectProfile = config.LastProfile;
+            Active = config.AutoConnect;
+            //Remapper.OnLog += RemapperOnLog;
+            //InfoLine = "";
+            //StateHasChanged();
+        }*/
+        //selectProfile = Remapper.CurrentProfile;
+        //ConsoleText = "";
+        //InfoLine = "";
+        //StateHasChanged();
+    }
+    public void PublicStateChanged()
+    {
+        StateHasChanged();
+    }
 
     public void Dispose()
     {
+        Remapper.OnLog -= RemapperOnLog;
+        Remapper.OnRead -= InfoUpdate;
         inputTest?.Close();
         inputTest?.Dispose();
     }
