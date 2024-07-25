@@ -38,6 +38,7 @@ namespace DSRemapperApp
         {
             Exception exception = (Exception)e.ExceptionObject;
             logger.LogCritical($"{sender.GetType().FullName}: {exception.Message}");
+            MessageBox.Show($"{sender.GetType().FullName}: {exception.Message}", "Unhandled Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
         }
 
         private static void Main_FormClosing(object? sender, FormClosingEventArgs e)
