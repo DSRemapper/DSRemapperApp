@@ -33,7 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="8.0.3" />
+    <PackageReference Include="DSRemapper.Core" Version="0.3.0-beta" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.WindowsForms" Version="8.0.100" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,8 +47,8 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="mkdir &quot;$(OutputPath)Plugins&quot;&#xD;&#xA;copy &quot;..\ZipPlugins\*.dsrp&quot; &quot;$(OutputPath)Plugins\*&quot;" />
-  </Target>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="mkdir &quot;$(OutputPath)Plugins&quot;&#xD;&#xA;copy &quot;..\ZipPlugins\*.dsrp&quot; &quot;$(OutputPath)Plugins\*&quot;" />
+	</Target>
 
 </Project>

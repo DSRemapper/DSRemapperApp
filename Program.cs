@@ -34,11 +34,11 @@ namespace DSRemapperApp
             logger.LogInformation("Exiting app ...");
         }
 
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private static void CurrentDomain_UnhandledException(object? sender, UnhandledExceptionEventArgs e)
         {
             Exception exception = (Exception)e.ExceptionObject;
-            logger.LogCritical($"{sender.GetType().FullName}: {exception.Message}");
-            MessageBox.Show($"{sender.GetType().FullName}: {exception.Message}", "Unhandled Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+            logger.LogCritical($"{sender?.GetType().FullName}: {exception.Message}");
+            MessageBox.Show($"{sender?.GetType().FullName}: {exception.Message}", "Unhandled Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
         }
 
         private static void Main_FormClosing(object? sender, FormClosingEventArgs e)
