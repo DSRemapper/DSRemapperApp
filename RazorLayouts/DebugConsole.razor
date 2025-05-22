@@ -1,6 +1,6 @@
 ﻿@using DSRemapper
-@using FireLibs.Logging;
-@using System.Web;
+@using System.Web
+@using Microsoft.Extensions.Logging
 
 @inject IJSRuntime JsRuntime
 @implements IDisposable
@@ -35,7 +35,9 @@
 @code {
     bool AutoScroll { get; set; } = true;
 
-    void PrintLog(LogEntry log)
+
+    void PrintLog(LogLevel logLevel, EventId id, string category, string message) => PrintLog((logLevel, id, category, message));
+    void PrintLog((LogLevel logLevel, EventId id, string category, string message) log)
     {
         AddHTMLLog(log.ToHTMLTag());
 

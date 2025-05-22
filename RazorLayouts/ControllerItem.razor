@@ -1,6 +1,7 @@
 ﻿@using DSRemapper;
 @using DSRemapper.Types;
 @using DSRemapper.Framework;
+@using Microsoft.Extensions.Logging; 
 
 @implements IDisposable
 
@@ -103,13 +104,13 @@
         inputTest.Focus();
     }
 
-    private void RemapperOnLog(object sender, FireLibs.Logging.LogLevel level, bool deviceConsole, string message)
+    private void RemapperOnLog(object sender, LogLevel level, bool deviceConsole, string message)
     {
         if (deviceConsole)
         {
-            if (level == FireLibs.Logging.LogLevel.Error)
+            if (level == LogLevel.Error)
             {
-                ConsoleText = new FireLibs.Logging.LogEntry(level, message).ToHTMLTag();
+                ConsoleText = (level,new EventId(0), "Device", message).ToHTMLTag();
             }
             else
                 ConsoleText = message;

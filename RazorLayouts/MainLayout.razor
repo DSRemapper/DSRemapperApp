@@ -6,7 +6,7 @@
 @using DSRemapperApp.RazorLayouts
 @using DSRemapperApp.RazorLayouts.MainPages
 @using DSRemapperApp.RazorLayouts.MainComponents
-@using FireLibs.Logging
+@using Microsoft.Extensions.Logging
 
 @inject IJSRuntime JsRuntime
 
@@ -94,7 +94,8 @@ CreateNoWindow = true
         consoleWindow.Show();
         consoleWindow.Focus();
     }
-    private void PrintLog(LogEntry log)
+    void PrintLog(LogLevel logLevel, EventId id, string category, string message) => PrintLog((logLevel, id, category, message));
+    void PrintLog((LogLevel logLevel, EventId id, string category, string message) log)
     {
         SetHTMLLog(log.ToHTMLTag());
     }
